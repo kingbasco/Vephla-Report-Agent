@@ -1,0 +1,28 @@
+name: Deploy isolated TEST Worker
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: vephla-agent-test-deployment
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: vephla-test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --ignore-scripts
+      - run: npm test
+      - run: npm run check
+      - run: npm run safety
+      - name: Bundle worker
+        run: npm run build
+      - name: Deploy exact test Worker (preserve D1 and admin secret)
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: node scripts/deploy-test.mjs
