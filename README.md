@@ -1,5 +1,9 @@
 # Vephla Reporting Agent
 
+> **Project handover and development tracking:** [START HERE — continue in any new chat](CONTINUE_HERE.md) · [7-phase checkbox roadmap](docs/DEVELOPMENT_STATUS.md) · [Architecture](docs/ARCHITECTURE.md) · [Decisions](docs/DECISIONS.md) · [Changelog](docs/CHANGELOG.md) · [Operations](docs/OPERATIONS.md) · [Agent instructions](AGENTS.md)
+
+**Current project position (2026-11-17 WAT):** Phase 1 infrastructure deployed but runtime/code-parity checks remain; Phase 2 Google Docs OAuth is the next feature. Source code is in GitHub; pushes to `main` run checks, **not deployments**. The test Worker cannot yet read the duplicate Google Doc independently and cannot submit forms or email.
+
 **Cloudflare Workers + D1 — Test-only project**
 
 A Vephla reporting automation foundation that reads an approved **duplicate** staff daily charter, generates scheduled-slot report previews and stores explicit task statuses. Unconfirmed activities are marked **Unverified**, and every evidence field uses `NIL`.
