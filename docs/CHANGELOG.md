@@ -2,6 +2,17 @@
 
 This is an audit-friendly summary, not a fabricated deployment history. Use precise dates, commit SHAs, and evidence links. New entries go at the top.
 
+## 2026-11-17 — Tested release deployed to existing isolated Worker
+
+- **Code commit:** [`e28a27572abcd309797281cf11798995f354b1a9`](https://github.com/kingbasco/Vephla-Report-Agent/commit/e28a27572abcd309797281cf11798995f354b1a9). **GitHub CI:** [44177004763](https://github.com/kingbasco/Vephla-Report-Agent/actions/runs/44177004763), completed success; all 23 tests, syntax/safety checks and bundle step passed.
+- Applied additive `migrations/0002_task_identity.sql` to existing test D1 `9dc42a9e-7b87-43d1-8996-e777135438a3`. Verified `task_status`, `report_runs`, `task_status_v2` exist; legacy status row count remained 0 before/after. No data reset or new database.
+- Deployed via connected Cloudflare API to existing Primary Worker `vephla-report-agent-test`. This one-time deployment used the already-authorized connector; the separate GitHub manual deployment environment/secrets remain unverified.
+- **Deployment ID:** `40ebe480-3cc7-41c4-bedd-c2f04818ed7f`. **Version ID:** `a0367b43-7283-422b-a623-99674969ab55`, 100% traffic. `BUILD_COMMIT` equals the code SHA above.
+- **Exact downloaded-module comparison passed** against the local esbuild artifact. Artifact SHA-256: `f5f6eac7546f681bf9ee77cfa3b2183ce270389bf18da7c039aa8c0434f180bd`. This resolves the previous standalone-source mismatch for this release.
+- Post-deployment API verification: existing `DB` and `ADMIN_TOKEN` bindings preserved; workers.dev enabled false; previews_enabled false; schedules empty. No Google OAuth secrets are present. No form/email code or send action enabled.
+- **Not verified:** actual HTTP `/health`, bearer `/config`, Worker-to-Google OAuth read, real `/preview`, or live status round-trip. Management-plane deployment/parity checks and mocked HTTP tests do not prove those runtime gates.
+- This documentation checkpoint follows the deployed code SHA; later docs-only main commits do not change the deployed code. Continue from independent Google client/offline consent provisioning and protected runtime access. Phase 2 remains incomplete.
+
 ## 2026-11-17 — Phase 2 refresh/parser implementation; live consent pending
 
 - Starting main: `bd19f427f35ee21afec37c24b601ca5decac908b`, CI success [44173300957](https://github.com/kingbasco/Vephla-Report-Agent/actions/runs/44173300957).

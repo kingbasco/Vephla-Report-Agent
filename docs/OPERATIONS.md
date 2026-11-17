@@ -91,3 +91,7 @@ Except `/health`, endpoints need `Authorization: Bearer <ADMIN_TOKEN>`. The Work
 - After deployment, compare the downloaded `worker.mjs` module SHA-256 with the built artifact and record deployment/version IDs. This proves code parity, not runtime success.
 - An internal service binding or approved protected route is still required for actual HTTP invocation. Do not enable public workers.dev to bypass this requirement.
 - Google Cloud credentials page returned `Site Unavailable` in the cloud browser, including one reload; no Google project/client/consent was changed. Secure OAuth provisioning must be resumed through a working authorized account surface.
+
+## Current release checkpoint
+
+Deployed code `e28a27572abcd309797281cf11798995f354b1a9`, CI [passed](https://github.com/kingbasco/Vephla-Report-Agent/actions/runs/44177004763); deployment `40ebe480-3cc7-41c4-bedd-c2f04818ed7f`, version `a0367b43-7283-422b-a623-99674969ab55`. Module comparison passed. Additive migration 0002 is already applied to existing test D1. DB/admin bindings preserved; all public access and Cron disabled. No independent Google secrets or authenticated runtime acceptance yet. Docs-only commits after this release do not require a code redeploy.

@@ -34,7 +34,7 @@ Public URL and preview URLs are disabled. No Cron, form sender or email sender i
 - Existing D1 `vephla-report-agent-test-db`, ID `9dc42a9e-7b87-43d1-8996-e777135438a3`, binding `DB`.
 - Secret `ADMIN_TOKEN` exists. Google OAuth secrets remain absent at inspection.
 - `BUILD_COMMIT` identifies the code release on health responses after deployment.
-- Before this session's code release, API inspection confirmed an older standalone script, fixture fallback, deployment `71791b06-9f2f-4e7d-ba08-caced7c45802`, version `315822cf-8ad0-440d-a079-aa4043d5dc1b`. See CHANGELOG for subsequent deployment.
+- Before this session's code release, API inspection confirmed an older standalone script, fixture fallback, deployment `71791b06-9f2f-4e7d-ba08-caced7c45802`, version `315822cf-8ad0-440d-a079-aa4043d5dc1b`. Current tested release `e28a27572abcd309797281cf11798995f354b1a9` supersedes it: deployment `40ebe480-3cc7-41c4-bedd-c2f04818ed7f`, version `a0367b43-7283-422b-a623-99674969ab55`. Downloaded module exactly matches the built artifact. Migration 0002 is applied; actual HTTP runtime remains unverified.
 
 ## Auth and secret boundary
 

@@ -2,7 +2,7 @@
 
 > **Project handover and development tracking:** [START HERE — continue in any new chat](CONTINUE_HERE.md) · [7-phase checkbox roadmap](docs/DEVELOPMENT_STATUS.md) · [Architecture](docs/ARCHITECTURE.md) · [Decisions](docs/DECISIONS.md) · [Changelog](docs/CHANGELOG.md) · [Operations](docs/OPERATIONS.md) · [Agent instructions](AGENTS.md)
 
-**Current project position (2026-11-17 WAT):** Phase 2 implementation is underway. Refreshable Google Docs reading, stricter parsing, WAT preview selection, stable task identities and 23 automated tests are implemented. Actual Google OAuth client/consent/secrets and protected live Worker preview remain outstanding; Phase 2 is **not complete**. See [OAuth setup](docs/GOOGLE_OAUTH_SETUP.md). Main pushes run CI, not deployments.
+**Current project position (2026-11-17 WAT):** Phase 2 implementation is underway. Refreshable Google Docs reading, stricter parsing, WAT preview selection, stable task identities and 23 automated tests are implemented. Actual Google OAuth client/consent/secrets and protected live Worker preview remain outstanding; Phase 2 is **not complete**. See [OAuth setup](docs/GOOGLE_OAUTH_SETUP.md). Tested code `e28a2757` is deployed to the existing isolated Worker with artifact parity verified. Main pushes run CI, not deployments.
 
 **Cloudflare Workers + D1 — Test-only project**
 
@@ -12,7 +12,7 @@ A Vephla reporting automation foundation that reads an approved **duplicate** st
 
 | Phase | Scope | Status |
 |---|---|---|
-| 1 | Infrastructure, Worker, isolated D1 | Deployed to Primary Cloudflare account |
+| 1 | Infrastructure, Worker, isolated D1 | Code parity verified; authenticated HTTP verification pending |
 | 2 | Google Docs OAuth and live charter reader | Code tested; external consent and live read pending |
 | 3 | Report generation and task statuses | Content identities and context tested; acceptance incomplete |
 | 4 | Form submission engine | Manual browser test passed separately; disabled in Worker |

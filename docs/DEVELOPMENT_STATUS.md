@@ -15,7 +15,7 @@
 
 | Phase | Area | Honest current status |
 |---|---|---|
-| 1 | Cloudflare project, isolation and D1 | Base deployed; end-to-end Worker and access verification outstanding |
+| 1 | Cloudflare project, isolation and D1 | Tested code deployed and parity verified; authenticated HTTP/runtime verification outstanding |
 | 2 | Google Docs integration and charter extraction | Refresh adapter and parser tests implemented; Google consent/secrets and live Worker read pending |
 | 3 | Status intelligence and truthful report generation | Content identities/context implemented and tested; broader acceptance checks remain |
 | 4 | Google Form automation | One external browser test successful; **Worker integration not implemented** |
@@ -36,11 +36,11 @@
 - [x] **CODE** Add source, D1 migration, tests and CI to GitHub `main`.
 - [x] **TEST** Five Node tests and source safety checks passed in GitHub CI on 2026-11-17 before documentation change.
 - [x] **CODE** CI executes checks on `main`; separate deployment workflow is manual only.
-- [ ] **TEST/CLOUD** Verify the **repository source and uploaded Cloudflare Worker are equivalent**; current upload predates GitHub source refactor.
+- [x] **TEST/CLOUD** Deployed tested code `e28a27572abcd309797281cf11798995f354b1a9`; downloaded module exactly matches local bundle. Deployment/version and SHA-256 recorded in CHANGELOG; docs-only follow-up commits do not affect code parity.
 - [ ] **TEST/CLOUD** Exercise live `/health` and protected `/config` through a safely authenticated internal route without enabling unrestricted public access.
 - [ ] **SECURITY** Review API authentication and access control for future protected preview route; ensure secret rotation and audit practice.
 - [ ] **REQUIRES REVIEW** Confirm deployment flow's GitHub Environment, scoped secrets and least privilege before using manual deploy.
-- [ ] **DOCS** Record deploy commit SHA and runtime verification results in a dated release entry.
+- [x] **DOCS** Recorded exact deployed code SHA, passing CI, deployment/version IDs, artifact comparison and isolation checks in CHANGELOG; HTTP/OAuth runtime acceptance explicitly remains unverified.
 
 **Phase 1 acceptance:** isolated database + Worker verified reachable securely, source/deployed parity confirmed, CI passing, no production/cross-project access.
 
@@ -77,7 +77,8 @@
 - [x] **CODE/TEST** Preserve heading context, source indexes, links and bullet depth; exclude headings, known clock-in instructions and role notes from assignments. Synthetic classification and brief-versus-prototype tests pass.
 - [ ] **TEST/CLOUD** Review real-source classification across further charter layouts; generic heading detection is heuristic.
 - [x] **CODE/TEST** SHA-256 task identity includes duplicate Doc/tab, date, slot, context and normalized text; status survives reorder and fails closed after content/context changes or duplicate text. Additive `0002` migration preserves legacy rows without trusting index statuses.
-- [ ] **TEST/CLOUD** Verify migrated identity status API against live D1 and actual charter.
+- [x] **CLOUD** Applied additive migration 0002 to existing test D1; schema verified and legacy row count preserved.
+- [ ] **TEST/CLOUD** Verify identity status API against actual charter through authenticated Worker HTTP.
 - [ ] **TEST** Handle split/incomplete/moved tasks, duplicates, holiday/weekend rules, previous-workday reporting.
 - [x] **LOCAL TEST** Actual brief-review entry remains separate under the project heading; synthetic test confirms completing a brief does not complete a prototype assignment.
 - [x] **TEST** Defaults and edited/ambiguous tasks stay Unverified; links come from source text runs only; status changes apply to exact identified assignments.
@@ -149,7 +150,7 @@
 
 ## Current blockers / next checklist action
 
-**First actionable unchecked item:** Phase 2 → **Provision approved Google OAuth client/offline consent and three Worker secrets**, then establish protected runtime access and verify the Worker read. Refresh/parser/identity code is implemented and synthetically tested; Phase 2 remains incomplete. Phase 1 parity/reachability checks remain open and should be included in the next deployment work.
+**First actionable unchecked item:** Phase 2 → **Provision approved Google OAuth client/offline consent and three Worker secrets**, then establish protected runtime access and verify the Worker read. Refresh/parser/identity code is implemented and synthetically tested; Phase 2 remains incomplete. Phase 1 code parity is verified for the recorded release; authenticated runtime reachability remains open.
 
 ## Update protocol
 
