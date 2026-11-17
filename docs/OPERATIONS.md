@@ -9,7 +9,7 @@
 3. Make one small scoped change; do not change permitted Doc/Form IDs.
 4. Execute:
    ```sh
-   npm install
+   npm ci
    npm test
    npm run check
    npm run safety
@@ -26,7 +26,7 @@
 | GET | `/health` | Non-sensitive test-mode health payload |
 | GET | `/config` | Read test IDs and disabled send flags |
 | GET | `/preview?date=2026-11-17&slot=2` | Parse test doc and assemble preview; currently blocked until Google OAuth |
-| POST | `/status` | Body: `{"date":"2026-11-17","slot":2,"taskIndex":0,"status":"unverified"}` |
+| POST | `/status` | Body: `{"date":"2026-11-17","slot":2,"taskId":"<64-character-id-from-preview>","status":"unverified"}` |
 | GET | `/runs` | Query recorded run history |
 
 Except `/health`, endpoints need `Authorization: Bearer <ADMIN_TOKEN>`. The Worker has no public URL, so these routes cannot currently be reached through workers.dev. **Never paste the token into chat/GitHub or URLs.**
@@ -35,7 +35,7 @@ Except `/health`, endpoints need `Authorization: Bearer <ADMIN_TOKEN>`. The Work
 
 - D1 name: `vephla-report-agent-test-db`.
 - Migration: `migrations/0001_initial.sql`.
-- Schema: `task_status` for explicit user-confirmed status; `report_runs` for basic reporting history.
+- Schema: legacy `task_status` retained; new explicit statuses use `task_status_v2`; `report_runs` remains basic history. Apply `migrations/0002_task_identity.sql` additively to the fixed test D1 before deploying 0.2.0. Never copy old index statuses automatically.
 - The existing schema is **not** a durable form-submission ledger; add idempotency tables before enabling any sending.
 - Do not erase/reset even a test database without confirming the impact on existing draft status.
 
@@ -79,3 +79,15 @@ Except `/health`, endpoints need `Authorization: Bearer <ADMIN_TOKEN>`. The Work
 - [ ] On every deploy, record exact GitHub SHA and Cloudflare verification status.
 - [ ] Review access tokens and least privilege before implementing the next phase.
 - [ ] Stop any live write until explicit approval and confirmation that the target is a duplicate test asset.
+
+## Phase 2 release and credential gate (2026-11-17)
+
+- `docs/GOOGLE_OAUTH_SETUP.md` contains the independent consent/secrets procedure and scope limitations.
+- Runtime requires three secret bindings: `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, `GOOGLE_OAUTH_REFRESH_TOKEN`. A manually pasted short-lived access token is not accepted.
+- `/status` validates the actual current charter and requires `taskId`; changed or ambiguous identities are rejected. Old index records are preserved but ignored.
+- `/preview` allows optional today's-WAT date/task selection; explicit historical requests remain supported, future dates fail. Late-day/weekend ambiguity requires explicit slot. This is not scheduling authorization.
+- `npm ci --ignore-scripts`, `npm test`, `npm run check`, `npm run safety`, `npm run build` are the release checks. CI now builds the exact source and uses the lockfile.
+- Before deployment, verify fixed account/D1/admin binding and no URL/Cron exposure. Set `BUILD_COMMIT` to the full tested code SHA while preserving D1 and secrets. Manual workflow additionally requires its scoped GitHub Environment/secrets; their presence remains unverified.
+- After deployment, compare the downloaded `worker.mjs` module SHA-256 with the built artifact and record deployment/version IDs. This proves code parity, not runtime success.
+- An internal service binding or approved protected route is still required for actual HTTP invocation. Do not enable public workers.dev to bypass this requirement.
+- Google Cloud credentials page returned `Site Unavailable` in the cloud browser, including one reload; no Google project/client/consent was changed. Secure OAuth provisioning must be resumed through a working authorized account surface.

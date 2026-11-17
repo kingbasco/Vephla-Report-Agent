@@ -1,98 +1,62 @@
 # Architecture and technical inventory
 
-**Reviewed:** 2026-11-17, WAT. This documents the observed and planned system separately.
-
-## Implemented system
+Reviewed 2026-11-17 WAT. Phase 2 code is implemented; independent Google consent and live runtime acceptance remain incomplete. See CHANGELOG for the exact source/deployment evidence.
 
 ```mermaid
 flowchart TD
-  GH["GitHub main\nsource, docs, CI tests"] -->|Manual workflow only; not configured for use| CF["Cloudflare Worker\nvephla-report-agent-test"]
-  CF --> D1[("Dedicated Cloudflare D1\nstatus + report_runs")]
-  CF -.->|OAuth not configured| GD["Duplicate Google Doc"]
-  CF -.-X GF["Duplicate Google Form\nsubmission disabled"]
-  CF -.-X EMAIL["Outgoing email\ndisabled"]
-  CRON["Cron schedules: none"] -.-X CF
+  CI["GitHub source and CI"] -->|"Manual test deployment"| W["Existing isolated Worker"]
+  W --> DB["Existing D1 database"]
+  W --> AUTH["Google offline OAuth refresh"]
+  AUTH --> DOC["Duplicate charter only"]
+  W --> P["Authenticated preview"]
 ```
 
-GitHub and Cloudflare are **not automatically synchronized**. GitHub contains modular source files; Cloudflare received an earlier standalone version uploaded directly via API. Treat parity as **unverified**, not as complete.
+Public URL and preview URLs are disabled. No Cron, form sender or email sender is active. GitHub push runs CI; it does not deploy.
 
-## Planned workflow (not active)
+## Modules
 
-```mermaid
-flowchart TD
-  S["WAT reporting slot"] --> R["Read authorised duplicate charter"]
-  R --> P["Extract specific date + Task slot"]
-  P --> U["Merge confirmed task statuses\nunknown = unverified"]
-  U --> V["Validate fields + NIL evidence"]
-  V --> D{"Dry run / authorised send?"}
-  D -->|Dry run| L["Persist preview / audit"]
-  D -->|Approved duplicate-only test| F["Authenticated Google Form submit"]
-  F --> C["Observe confirmation / uncertain outcome"]
-  C --> L
-  L --> E["Optional end-of-day email\nseparately approved"]
-```
-
-## Runtime
-
-- Cloudflare account: Primary connection; do not create or modify resources in other accounts.
-- Worker: `vephla-report-agent-test`, module Worker, deployed Nov 17.
-- DB: `vephla-report-agent-test-db`, binding `DB`.
-- Database tables:
-  - `task_status(report_date, slot, task_index, status, updated_at)`, composite PK; statuses `completed`, `in-progress`, `blocked`, `unverified`.
-  - `report_runs(id, report_date, slot, stage, content, created_at)`; unique `(report_date, slot, stage)`. **Not yet a complete idempotent submission ledger**.
-- `ADMIN_TOKEN`: secret-text binding present in deployed Worker; do not disclose.
-- No `GOOGLE_DOCS_ACCESS_TOKEN` in deployed settings at initial inspection. Even if added, short-lived tokens require refresh flow.
-- Worker `workers.dev` disabled; previews disabled; Cron Triggers none. This means endpoints are **not publicly testable** without new explicit secure access setup.
-- Form submit and email adapters absent from Worker and GitHub repo.
-- `GET /health` returns generic status; all other endpoints require bearer auth. No public route is currently enabled.
-- `GET /config`, `GET /preview?date=YYYY-MM-DD&slot=1..4`, `POST /status`, `GET /runs`.
-
-## Code map
-
-| Path | Responsibility |
+| Module | Responsibility |
 |---|---|
-| `src/config.mjs` | Test-only IDs, four slots, WAT, `NIL` |
-| `src/parser.mjs` | Flatten Google Doc paragraphs/tables; date + Task extraction |
-| `src/report.mjs` | Status mapping and truthful progress report |
-| `src/index.mjs` | Worker HTTP API, bearer auth, D1 operations, disabled scheduler |
-| `migrations/0001_initial.sql` | D1 tables |
-| `fixtures/nov17-task2.json` | Synthetic representative sample; not independent work proof |
-| `test/parser.test.mjs` | Parser/report unit tests |
-| `scripts/safety-check.mjs` | Guard against incorrect doc/form IDs and senders |
-| `scripts/deploy-test.mjs` | Manually gated Cloudflare API deploy; validates isolation |
-| `.github/workflows/ci.yml` | Tests on push/PR; no deploy |
-| `.github/workflows/deploy-test.yml` | Manual only; requires secrets and protected environment |
+| `src/config.mjs` | Immutable duplicate IDs, four slots, WAT and NIL |
+| `src/google-docs.mjs` | Fixed-endpoint OAuth refresh and duplicate-only Docs GET; expiry cache, revoked-consent errors, one 401 retry |
+| `src/workday.mjs` | Calendar validation, current WAT date, conservative optional preview task selection |
+| `src/parser.mjs` | Recursive child tabs and nested tables, date/task boundaries, heading context, source references, known administrative-note exclusion |
+| `src/task-identity.mjs` | SHA-256 of Doc/tab/date/slot/context/normalized assignment; duplicate identity detection |
+| `src/report.mjs` | Unverified default; exact-assignment explicit statuses; source links/context; NIL; no attendance claim |
+| `src/index.mjs` | Bearer-protected API, current-source identity validation before status writes, redacted errors; no sending |
+| `migrations/0002_task_identity.sql` | Additive identity status table; legacy records preserved |
+| `scripts/deploy-test.mjs` | Fixed account/Worker/DB checks, schema prerequisite, revision annotation and disabled-exposure checks |
 
-## Source data and output contract
+## Infrastructure
 
-**Authorized inputs:** Duplicate Google Doc only, with `NOVEMBER CHARTERS` tab `t.henz7cnke67i`. For 2026-11-17 Task 2, charter range is 8 AM–noon. The charter provides **assignments**, not evidence of completed work.
+- Primary Cloudflare account `e6279978097c9f10b46e7eb23e90d34f`.
+- Existing Worker `vephla-report-agent-test`; do not recreate.
+- Existing D1 `vephla-report-agent-test-db`, ID `9dc42a9e-7b87-43d1-8996-e777135438a3`, binding `DB`.
+- Secret `ADMIN_TOKEN` exists. Google OAuth secrets remain absent at inspection.
+- `BUILD_COMMIT` identifies the code release on health responses after deployment.
+- Before this session's code release, API inspection confirmed an older standalone script, fixture fallback, deployment `71791b06-9f2f-4e7d-ba08-caced7c45802`, version `315822cf-8ad0-440d-a079-aa4043d5dc1b`. See CHANGELOG for subsequent deployment.
 
-**Statuses:** Work is **unverified** unless separately confirmed. User-confirmed categories can be marked completed; the system must not infer that every substep in those categories occurred. Project Uni Flex *brief review* does not mean UI/prototype is finished.
+## Auth and secret boundary
 
-**Form schema observed in browser:** signed-in Google respondent email, clock-in radio (1–4), Date, Time of Clock-In, Full Names, Official Email, Role, Month dropdown, Day dropdown, Progress Report text, Upload Verifications text. Actual form UI may evolve; no production assumptions.
+The Worker needs its own OAuth client and offline grant. ChatGPT's Drive connector and browser sign-in are separate identities. The implementation expects only `documents.readonly`; that scope is account-wide for Docs. The immutable ID is an application boundary, not provider-enforced single-file authorization. Dedicated duplicate-only Viewer identity is preferred, and actual consent remains an external gate. See [OAuth setup](GOOGLE_OAUTH_SETUP.md).
 
-**Evidence field:** Always literal `NIL`, per user. This does not assert evidence exists.
+Access tokens are cached in isolate memory only, with early expiry and shared in-flight refresh. A changed bindings credential tuple invalidates that cache. Rotated refresh-token responses require secure operator installation; they are not logged or persisted automatically. Raw upstream errors never appear in API responses.
 
-**Time:** Africa/Lagos, UTC+1; never backdate submission clock; classify historical reports distinctly from real-time attendance. Charter's 8 AM first reporting step and Form's 9 AM option need policy reconciliation before automatic scheduling.
+## Data and status contracts
 
-## Authentication boundaries
+- `task_status`: legacy index-based records retained but not used by the new status API.
+- `task_status_v2`: `(report_date,slot,task_id)` primary key; allowed statuses completed/in-progress/blocked/unverified. No automatic transfer from index statuses. Exact content/context changes lose inherited confirmation; duplicate identities cannot be confirmed.
+- `report_runs`: historical scaffold, not a complete submission ledger. Preview requests currently do not persist full report content.
+- `/status` now requires a SHA-256 `taskId` from the current preview; old `taskIndex` payloads are rejected. The source is reread before confirming a current identity.
+- Source indexes and links are returned only through the protected preview, never public logs. Headings are context; substeps remain separate entries. Classification is heuristic and requires wider source acceptance.
+- Completion of a brief review never means its project/prototype is finished. All unknown assignments remain Unverified. Evidence is always exactly NIL.
 
-The Google Drive connector that ChatGPT uses and the browser session previously used to submit the test form are **not** automatically available to Cloudflare. The Worker must obtain its own permissioned Google Docs OAuth credentials and refresh mechanism. The form respondent authentication may require an authorised managed browser session. Store all secrets in secure providers, not GitHub, docs, tickets, logs or CI artifacts.
+## Time and source acceptance
 
-## Security & privacy
+The connected Google tool read the actual duplicate November tab. Local Nov 17 Task 2 extraction yielded 33 nonempty lines, 22 assignment/substep entries and 11 context/instruction lines; all assignments Unverified, no Task 3 leakage. Raw charter data was kept out of the public repository. This is connector-plus-local evidence, not an independent Worker read.
 
-- Repository was public as reviewed; do not add private work records, staff profiles, Google auth secrets, or SMTP passwords.
-- Existing Worker has no public address; enable only protected routes with authorisation and opt-in.
-- Prohibit production Doc/Form IDs in test deployment by validation; sending off until separately approved.
-- Add durable submission ledger and halt-on-uncertain before implementing retries.
-- Logs must redact personal data and authorization headers.
-- Do not store the respondent account's password in this repository.
+Preview defaults use today's Africa/Lagos date. During 08:00–12:00 the default charter section is Task 2; during 12:00–15:00 Task 3. Explicit slot is required for historical, weekend, pre-workday and 15:00 onward requests. Future reports are rejected. Task 1 previous-workday semantics, holidays, first clock-in 8 vs 9 and final clock-in policy remain unresolved. No schedule is enabled.
 
-## Known limitations and differences
+## Remaining acceptance gates
 
-1. The current test fixture and parser unit test do not prove real Google Docs integration works.
-2. Parsed paragraphs can include headings/instructions and may not directly correspond to five activity groups; classification work remains.
-3. Task status keyed by list index can drift if source document changes; requires stable task identifiers.
-4. The D1 `report_runs` table is a history stub, not a complete idempotency ledger.
-5. Source code in GitHub is not guaranteed identical to manually uploaded standalone Worker.
-6. No scheduled jobs or production form submission is active.
+Independent OAuth client/consent and secure secret provisioning; protected live invocation path; actual Worker Doc read, source classification and D1 status tests; expired-consent recovery; form schema/session/submission method; durable submission ledger; schedule policy; email identity and delivery; dashboard; final QA. Phase 2 remains open until live read and protected preview pass.

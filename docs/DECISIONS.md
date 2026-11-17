@@ -35,3 +35,11 @@ Last reviewed: **2026-11-17**, WAT. Update this log when a user explicitly chang
 - One successful duplicate-form response is **not** proof of 4× daily scheduling.
 - A passing GitHub CI run is **not** proof of live Cloudflare deployment.
 - Listing a charter assignment is **not** proof of task completion.
+
+## 2026-11-17 — Phase 2 implementation decisions
+
+- D-015: Implement the refresh-token adapter for the read-only Docs scope. It is account-wide; code requests only the immutable duplicate. Reader identity and external consent remain pending. A dedicated reader with duplicate-only Viewer access is preferred; no broad personal-account consent is presumed. See [setup and limitations](GOOGLE_OAUTH_SETUP.md).
+- D-016: Reject repeated date/task sections instead of selecting the last match. Treat uppercase project headings as context, preserve substeps and source references, exclude role/clock-in notes. Heuristic classification still needs wider live-source acceptance.
+- D-017: Store new statuses in additive `task_status_v2`, keyed by content/context identity. Preserve legacy index rows but never automatically apply them to edited charter content. Duplicate identities are Unverified and cannot be confirmed through the API.
+- D-018: Optional automatic preview selection uses today's WAT date and charter periods (08:00–12:00 Task 2, 12:00–15:00 Task 3). Require explicit slot for historical/weekend/pre-workday or 15:00 onward requests. This does not decide attendance schedules, holidays or Task 1 previous-day semantics.
+- D-019: The 2026-11-17 user request authorizes tested implementation on main and updating the existing isolated Worker. Keep public URLs, Cron and sending disabled. Google consent and protected route setup remain external gates.

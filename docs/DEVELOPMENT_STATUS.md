@@ -16,8 +16,8 @@
 | Phase | Area | Honest current status |
 |---|---|---|
 | 1 | Cloudflare project, isolation and D1 | Base deployed; end-to-end Worker and access verification outstanding |
-| 2 | Google Docs integration and charter extraction | Parser code exists; independent Worker OAuth missing |
-| 3 | Status intelligence and truthful report generation | Model and generator scaffolded; acceptance tests still required |
+| 2 | Google Docs integration and charter extraction | Refresh adapter and parser tests implemented; Google consent/secrets and live Worker read pending |
+| 3 | Status intelligence and truthful report generation | Content identities/context implemented and tested; broader acceptance checks remain |
 | 4 | Google Form automation | One external browser test successful; **Worker integration not implemented** |
 | 5 | Scheduling, retries and deduplication | Not implemented |
 | 6 | Detailed email, dashboard, administration | Not implemented |
@@ -49,16 +49,21 @@
 - [x] **CODE** Implement tab-aware parsing for the `NOVEMBER CHARTERS` tab.
 - [x] **CODE** Implement date and Task 1–4 section separation.
 - [x] **TEST** Basic sample parser tests exist.
-- [ ] **AUTH** Choose Google Docs OAuth integration with least privilege and consent for the dedicated Worker.
-- [ ] **AUTH** Implement secure long-lived refresh / rotation; no hard-coded access token and no tokens in Git.
+- [x] **CODE/DESIGN** Implement a read-only Docs refresh-token adapter and immutable duplicate-ID network boundary. Scope limitation and alternatives documented in `docs/GOOGLE_OAUTH_SETUP.md`.
+- [ ] **AUTH** Approve reader identity/scope and provision the independent OAuth client and offline consent. Provider-enforced single-file access is not established.
+- [x] **CODE/TEST** Implement refresh, early expiry, concurrent exchange sharing, secret-change cache invalidation, one 401 retry, revoked-consent and rotation-required handling. Synthetic automated tests pass. Live refresh/credential rotation remains unverified.
 - [ ] **AUTH** Ensure OAuth client is allowed to read **only intended duplicate material** as far as Google authorization permits.
 - [ ] **CLOUD** Configure secrets for Google Docs API access on isolated test Worker.
 - [ ] **TEST/CLOUD** Authenticated read of duplicate Google Doc **from Worker**, not merely ChatGPT connector.
-- [ ] **TEST** Verify exact Nov 17 Task 2 extraction against actual duplicate charter; headings, nested tables, links and repeated dates handled.
-- [ ] **TEST** Confirm other dates and all four tasks, empty sections, future dates and malformed docs fail safely.
-- [ ] **TEST** Confirm expired/revoked OAuth errors are visible and do not trigger bogus reports.
+- [x] **CONNECTOR/LOCAL TEST** Read actual duplicate November tab and validate Nov 17 Task 2 extraction locally: 33 nonempty source lines; 22 assignments/substeps and 11 context/instruction lines; all Unverified, evidence NIL. No raw charter committed.
+- [x] **TEST** Synthetic nested-table/tab, link preservation, repeated date/task rejection and section-boundary cases pass.
+- [ ] **TEST/CLOUD** Repeat exact-source validation through the independently authenticated Worker, including real source links and tables.
+- [x] **TEST** Synthetic all-four-task boundaries, missing/ambiguous tabs, repeated dates, empty sections, invalid/future dates, weekend/pre-workday ambiguity and WAT rollover checks pass.
+- [ ] **TEST/CLOUD** Validate other actual dates/tasks and source edits through the Worker. Task 1 previous-workday semantics and holiday policy remain open.
+- [x] **TEST** Synthetic expired-token, revoked-grant, denied/missing document, scope mismatch, upstream/network error cases return redacted errors; no fallback reports.
+- [ ] **TEST/CLOUD** Repeat expired/revoked consent verification with the actual Worker grant.
 - [ ] **TEST/CLOUD** Generate a protected, successful Worker report preview using the duplicate Doc.
-- [ ] **DOCS** Record OAuth access model and test results; exclude tokens from logs.
+- [x] **DOCS** Record OAuth access model, scope limitations, setup gate and synthetic test results; tokens excluded from logs.
 
 **Phase 2 acceptance:** Worker reads duplicate charter securely, parses expected task groups and generates an authenticated preview without sending anything.
 
@@ -69,11 +74,13 @@
 - [x] **CODE** Support explicit `/status` updates persisted in D1.
 - [x] **CODE** Generate report preview with `NIL`, source date, slot and statuses.
 - [x] **TEST** Basic test cases for defaults, explicit completed status, dates and labels.
-- [ ] **DESIGN** Distinguish activity groups from nested instructions, headings, and actual deliverables.
-- [ ] **DESIGN** Add source references, task IDs, and stability across charter edits; avoid status-by-index drift.
+- [x] **CODE/TEST** Preserve heading context, source indexes, links and bullet depth; exclude headings, known clock-in instructions and role notes from assignments. Synthetic classification and brief-versus-prototype tests pass.
+- [ ] **TEST/CLOUD** Review real-source classification across further charter layouts; generic heading detection is heuristic.
+- [x] **CODE/TEST** SHA-256 task identity includes duplicate Doc/tab, date, slot, context and normalized text; status survives reorder and fails closed after content/context changes or duplicate text. Additive `0002` migration preserves legacy rows without trusting index statuses.
+- [ ] **TEST/CLOUD** Verify migrated identity status API against live D1 and actual charter.
 - [ ] **TEST** Handle split/incomplete/moved tasks, duplicates, holiday/weekend rules, previous-workday reporting.
-- [ ] **TEST** Treat “Project Uni Flex brief reviewed” as a review, not full design/prototype completion.
-- [ ] **TEST** Verify reports do not turn unverified items into completed actions, and do not invent links.
+- [x] **LOCAL TEST** Actual brief-review entry remains separate under the project heading; synthetic test confirms completing a brief does not complete a prototype assignment.
+- [x] **TEST** Defaults and edited/ambiguous tasks stay Unverified; links come from source text runs only; status changes apply to exact identified assignments.
 - [ ] **TEST** Establish report format suitable for form character limits and WAT period.
 - [ ] **SECURITY** Avoid publishing staff information/complete reports in public logs.
 
@@ -142,7 +149,7 @@
 
 ## Current blockers / next checklist action
 
-**First actionable unchecked item:** Phase 2 → **Choose and implement independent Google Docs OAuth**, then verify real Worker read of the duplicate charter. Phase 1 parity/reachability checks remain open and should be included in the next deployment work.
+**First actionable unchecked item:** Phase 2 → **Provision approved Google OAuth client/offline consent and three Worker secrets**, then establish protected runtime access and verify the Worker read. Refresh/parser/identity code is implemented and synthetically tested; Phase 2 remains incomplete. Phase 1 parity/reachability checks remain open and should be included in the next deployment work.
 
 ## Update protocol
 

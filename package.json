@@ -1,11 +1,11 @@
 {
-  "name": "vephla-report-agent-phase1",
-  "version": "0.1.0",
+  "name": "vephla-report-agent",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "scripts": {
     "test": "node --test test/*.test.mjs",
-    "check": "node --check src/index.mjs && node --check src/parser.mjs && node --check src/report.mjs",
+    "check": "node --check src/index.mjs && node --check src/parser.mjs && node --check src/report.mjs && node --check src/google-docs.mjs && node --check src/workday.mjs && node --check src/task-identity.mjs",
     "build": "esbuild src/index.mjs --bundle --format=esm --platform=browser --target=es2022 --outfile=dist/worker.mjs",
     "safety": "node scripts/safety-check.mjs"
   },

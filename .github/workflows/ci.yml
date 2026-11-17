@@ -14,8 +14,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: npm install --ignore-scripts
+      - run: npm ci --ignore-scripts
       - run: npm test
       - run: npm run check
       - name: Guard against production IDs and sending code
         run: npm run safety
+      - name: Bundle exact source
+        run: npm run build

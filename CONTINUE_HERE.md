@@ -6,7 +6,7 @@
 
 This is a proposed fully automated workday reporting agent for Vephla Group. Each workday, it should read the daily charter from a Google Doc, identify Tasks 1–4, write honest progress reports, and eventually submit four Google Form clock-ins. A more detailed end-of-day email may follow. **User's final policy:** fully automatic submissions, **unverified statuses explicitly labelled**, evidence field always **`NIL`**, Africa/Lagos (WAT). Automation must not fabricate completion, proof links, time worked, or past clock-in times.
 
-**Current state:** Phase 1 Cloudflare infrastructure deployed; Phase 2 (independent Google Docs auth) is next. GitHub stores source and docs, but pushing to `main` does **not** deploy. The deployed Worker and repository are separate snapshots until manually reconciled/deployed. The original company Google Doc, Google Form, and mail recipients remain **out of scope** for tests and must not be accessed for writes.
+**Current state:** Phase 2 refresh/parser implementation and initial Phase 3 identity protections are coded and tested (23 automated tests). Independent Google OAuth client/consent/secrets and protected live Worker invocation remain blocked. Phase 2 is not complete. Existing infrastructure is reused; see CHANGELOG for source SHA and deployed artifact verification. Main pushes run CI, not deployments. No form sender, email delivery, Cron or public URL has been enabled.
 
 ## Project pointers
 
@@ -30,18 +30,18 @@ This is a proposed fully automated workday reporting agent for Vephla Group. Eac
 
 ## Current deliverable vs desired system
 
-**Exists:** source files, test document parser, report generator, status update API, D1 schema, safe scheduled handler, CI validation and manual gated deployment workflow, duplicate-only browser form submission proof-of-concept.
+**Exists:** refresh-token Docs reader adapter; recursive tab/table parser with context and fail-closed ambiguity checks; WAT preview selection; SHA-256 assignment identities and additive status schema; report/status API; 23 automated tests; locked CI build and manual gated deploy; previous duplicate-only browser form proof-of-concept.
 
 **Not delivered:** live authenticated Google Docs reading inside Worker; validated real Worker `/preview`; reliable Google Form submission from Worker; daily scheduler; persisted send deduplication; cPanel SMTP; UI dashboard; production credentials; end-to-end launch.
 
-## Next exact task — Phase 2
+## Next exact task — finish Phase 2 external acceptance
 
-1. Check `docs/DEVELOPMENT_STATUS.md` for the unchecked items, review last GitHub commit and recent CI.
-2. Decide the **least-privileged independent Google Docs OAuth** approach for the isolated Worker. Auth must work across runs and refresh tokens without manually copying short-lived access tokens; no tokens committed to Git.
-3. Confirm it can only read the **duplicate** Doc; test November tab selection and the 2026-11-17 Task 2 range, including paragraphs in tables.
-4. Compare the parsed items to the duplicate charter; avoid treating headings, reminders, and assignments as automatically completed.
-5. Verify secure test-only API access, run `/preview?date=2026-11-17&slot=2` with all activities initially **unverified**, log observed results and update checklist.
-6. Keep all form submissions, email delivery, Cron, production URLs and public workers.dev **disabled**. Get explicit approval before enabling sending, even on the duplicate when the next phase introduces it.
+1. Read `docs/GOOGLE_OAUTH_SETUP.md`. Choose/approve a Google reader identity and provision a Google OAuth client with offline consent. The implemented read-only Docs scope is account-wide; prefer a dedicated identity with duplicate-only Viewer access. Code restricts reads to the duplicate, not Google permission itself.
+2. Install `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, `GOOGLE_OAUTH_REFRESH_TOKEN` as secrets on the existing test Worker, through a secure surface. Never paste secrets into chat or public GitHub. Google Cloud credentials UI was unavailable in this cloud browser; no consent was obtained.
+3. Establish an authorized internal/protected invocation path without public workers.dev. Test `/health`, bearer-protected `/config`, and `/preview?date=2026-11-17&slot=2` independently from the Worker. Confirm real Google API read and D1, redacted failures, source links and Unverified/NIL output.
+4. `0002_task_identity.sql` is additive: preserve old `task_status`, use `task_status_v2`. Status API now takes `taskId`, not index. Confirm exact identity and changed-source behaviour live.
+5. Connector read plus local actual-source validation passed for Nov 17 Task 2 (33 source lines; 22 assignment/substep entries, 11 context/instruction lines). It is not proof of Worker OAuth. Test other source dates/layouts and revoked consent before checking cloud acceptance.
+6. Then proceed with remaining Phase 3 acceptance. Task 1 previous-day semantics, first clock-in 8 vs 9 and final-clock/holiday decisions must precede scheduling. Sending and Cron remain disabled until explicitly authorized.
 
 ## How to work in future chats
 

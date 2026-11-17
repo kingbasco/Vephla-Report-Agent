@@ -2,7 +2,7 @@
 
 > **Project handover and development tracking:** [START HERE — continue in any new chat](CONTINUE_HERE.md) · [7-phase checkbox roadmap](docs/DEVELOPMENT_STATUS.md) · [Architecture](docs/ARCHITECTURE.md) · [Decisions](docs/DECISIONS.md) · [Changelog](docs/CHANGELOG.md) · [Operations](docs/OPERATIONS.md) · [Agent instructions](AGENTS.md)
 
-**Current project position (2026-11-17 WAT):** Phase 1 infrastructure deployed but runtime/code-parity checks remain; Phase 2 Google Docs OAuth is the next feature. Source code is in GitHub; pushes to `main` run checks, **not deployments**. The test Worker cannot yet read the duplicate Google Doc independently and cannot submit forms or email.
+**Current project position (2026-11-17 WAT):** Phase 2 implementation is underway. Refreshable Google Docs reading, stricter parsing, WAT preview selection, stable task identities and 23 automated tests are implemented. Actual Google OAuth client/consent/secrets and protected live Worker preview remain outstanding; Phase 2 is **not complete**. See [OAuth setup](docs/GOOGLE_OAUTH_SETUP.md). Main pushes run CI, not deployments.
 
 **Cloudflare Workers + D1 — Test-only project**
 
@@ -13,8 +13,8 @@ A Vephla reporting automation foundation that reads an approved **duplicate** st
 | Phase | Scope | Status |
 |---|---|---|
 | 1 | Infrastructure, Worker, isolated D1 | Deployed to Primary Cloudflare account |
-| 2 | Google Docs OAuth and live charter reader | Pending |
-| 3 | Report generation and task statuses | Scaffolded |
+| 2 | Google Docs OAuth and live charter reader | Code tested; external consent and live read pending |
+| 3 | Report generation and task statuses | Content identities and context tested; acceptance incomplete |
 | 4 | Form submission engine | Manual browser test passed separately; disabled in Worker |
 | 5 | Scheduling and duplicate prevention | Pending |
 | 6 | Email reports and dashboard | Pending |
@@ -29,7 +29,7 @@ This repository contains the Phase 1 source, migrations, tests and CI workflow. 
 Requires Node.js 20+.
 
 ```bash
-npm install
+npm ci
 npm test
 npm run check
 npm run safety
@@ -44,7 +44,7 @@ npm run build
 - Time zone: `Africa/Lagos`
 - Mode: `test-preview-only`
 
-No credentials are committed. The project currently needs a Google Docs OAuth token lifecycle before the deployed Worker can independently read the test Doc. ChatGPT's connected Google Drive session does not automatically provide Cloudflare with OAuth access.
+No credentials are committed. The refresh lifecycle is implemented; the existing Worker still needs independent OAuth provisioning before it can read the test Doc. ChatGPT's connected Google Drive session does not automatically provide Cloudflare with OAuth access.
 
 ## Cloudflare API endpoints
 
