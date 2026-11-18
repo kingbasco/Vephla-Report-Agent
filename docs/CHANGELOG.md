@@ -2,6 +2,14 @@
 
 This is an audit-friendly summary, not a fabricated deployment history. Use precise dates, commit SHAs, and evidence links. New entries go at the top.
 
+## 2026-11-18 — Protected runtime invocation assessment
+
+- Confirmed latest Worker deployment `daa867b9-27a5-4edc-9700-8404022c0039`, version `e57606f0-e364-4371-81ed-0eed79f98350` (100% traffic), with all three Google OAuth secret bindings present. No secret values retrieved.
+- Rechecked Cloudflare: workers.dev disabled; preview URLs disabled; Cron schedules empty.
+- Searched supported Cloudflare management API operations and Cloudflare documentation for a private deployed-Worker HTTP invoke without a route. No directly supported authenticated invocation endpoint was available via the connected Cloudflare management connector; **no live Worker HTTP requests were made**.
+- Added `docs/PHASE2_RUNTIME_TEST.md` with safe test options, acceptance criteria, and OAuth error recovery. Do not enable public routes or Cron just for diagnostics.
+- Remaining unverified: real OAuth refresh, Google Docs read, protected health/config/preview, D1 integration under runtime, and secret-value correctness. No form sent, no mail sent, no deployment code change.
+
 ## 2026-11-18 — Phase 2 Google OAuth secret bindings verified
 
 - User reported completing Google OAuth authorization and adding all three credentials to the **existing** Primary Cloudflare Worker `vephla-report-agent-test`.
