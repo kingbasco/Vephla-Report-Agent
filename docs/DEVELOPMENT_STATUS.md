@@ -1,6 +1,6 @@
 # Development status — checkbox master tracker
 
-**Canonical roadmap: 7 phases. Updated:** 2026-11-17 WAT. Owner: Vephla Reporting Agent project. Repository: `kingbasco/Vephla-Report-Agent`.
+**Canonical roadmap: 7 phases. Updated:** 2026-11-18 WAT. Owner: Vephla Reporting Agent project. Repository: `kingbasco/Vephla-Report-Agent`.
 
 ## How to interpret checkboxes
 
@@ -53,7 +53,7 @@
 - [ ] **AUTH** Approve reader identity/scope and provision the independent OAuth client and offline consent. Provider-enforced single-file access is not established.
 - [x] **CODE/TEST** Implement refresh, early expiry, concurrent exchange sharing, secret-change cache invalidation, one 401 retry, revoked-consent and rotation-required handling. Synthetic automated tests pass. Live refresh/credential rotation remains unverified.
 - [ ] **AUTH** Ensure OAuth client is allowed to read **only intended duplicate material** as far as Google authorization permits.
-- [ ] **CLOUD** Configure secrets for Google Docs API access on isolated test Worker.
+- [x] **CLOUD** Confirm three Google Docs OAuth secrets are installed as Cloudflare `secret_text` bindings on the isolated Worker (2026-11-18; names/types confirmed without reading values). **Live token exchange and document read are not yet verified.**
 - [ ] **TEST/CLOUD** Authenticated read of duplicate Google Doc **from Worker**, not merely ChatGPT connector.
 - [x] **CONNECTOR/LOCAL TEST** Read actual duplicate November tab and validate Nov 17 Task 2 extraction locally: 33 nonempty source lines; 22 assignments/substeps and 11 context/instruction lines; all Unverified, evidence NIL. No raw charter committed.
 - [x] **TEST** Synthetic nested-table/tab, link preservation, repeated date/task rejection and section-boundary cases pass.
@@ -150,7 +150,7 @@
 
 ## Current blockers / next checklist action
 
-**First actionable unchecked item:** Phase 2 → **Provision approved Google OAuth client/offline consent and three Worker secrets**, then establish protected runtime access and verify the Worker read. Refresh/parser/identity code is implemented and synthetically tested; Phase 2 remains incomplete. Phase 1 code parity is verified for the recorded release; authenticated runtime reachability remains open.
+**First actionable unchecked item:** Phase 2 → **Confirm authorization/account and scope suitability; establish protected runtime access and verify actual OAuth refresh and Worker document read. All three Worker secret bindings are present; values are not verifiable by reading binding metadata. Refresh/parser/identity code is implemented and synthetically tested; Phase 2 remains incomplete. Phase 1 code parity is verified for the recorded release; authenticated runtime reachability remains open.
 
 ## Update protocol
 
