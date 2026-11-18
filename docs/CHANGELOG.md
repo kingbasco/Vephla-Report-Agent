@@ -2,6 +2,14 @@
 
 This is an audit-friendly summary, not a fabricated deployment history. Use precise dates, commit SHAs, and evidence links. New entries go at the top.
 
+## 2026-11-18 — Phase 2 Google OAuth secret bindings verified
+
+- User reported completing Google OAuth authorization and adding all three credentials to the **existing** Primary Cloudflare Worker `vephla-report-agent-test`.
+- Checked Cloudflare Worker settings and secret-binding inventory via Primary account API. `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET` and `GOOGLE_OAUTH_REFRESH_TOKEN` each exist with type `secret_text`. Secret values were **not retrieved, copied or printed**.
+- Confirmed Worker Cron Triggers remained empty and workers.dev/preview addresses remained disabled.
+- **Not verified:** correctness of secret values, token refresh, chosen reader account, Google Docs API permission, independent Worker read, D1 preview result, authenticated HTTP route. Do not mark Phase 2 accepted.
+- No code deployed, no form submitted, no mail sent, no scheduling enabled. Next: secure internal invocation of `/health`, `/config` and `/preview` without unrestricted public URL; verify token exchange and actual duplicate document read, then update evidence.
+
 ## 2026-11-17 — Tested release deployed to existing isolated Worker
 
 - **Code commit:** [`e28a27572abcd309797281cf11798995f354b1a9`](https://github.com/kingbasco/Vephla-Report-Agent/commit/e28a27572abcd309797281cf11798995f354b1a9). **GitHub CI:** [44177004763](https://github.com/kingbasco/Vephla-Report-Agent/actions/runs/44177004763), completed success; all 23 tests, syntax/safety checks and bundle step passed.
