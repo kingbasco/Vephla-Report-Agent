@@ -16,7 +16,7 @@
 | Phase | Area | Honest current status |
 |---|---|---|
 | 1 | Cloudflare project, isolation and D1 | Tested code deployed and parity verified; authenticated HTTP/runtime verification outstanding |
-| 2 | Google Docs integration and charter extraction | Refresh adapter and parser tests implemented; Google consent/secrets and live Worker read pending |
+| 2 | Google Docs integration and charter extraction | Refresh adapter and parser tests implemented; all three secret bindings present; live Worker token exchange and Doc read pending |
 | 3 | Status intelligence and truthful report generation | Content identities/context implemented and tested; broader acceptance checks remain |
 | 4 | Google Form automation | One external browser test successful; **Worker integration not implemented** |
 | 5 | Scheduling, retries and deduplication | Not implemented |
@@ -149,6 +149,8 @@
 **Phase 7 acceptance:** signed-off system operating safely, with documented rollback, audit history and clear ownership.
 
 ## Current blockers / next checklist action
+
+Use [the protected runtime test runbook](PHASE2_RUNTIME_TEST.md). Cloudflare's available management API could not invoke the disabled-route Worker as a private HTTP request; **do not enable a public URL just to test**. The checklist for `/health`, `/config` and live `/preview` stays unchecked.
 
 **First actionable unchecked item:** Phase 2 → **Confirm authorization/account and scope suitability; establish protected runtime access and verify actual OAuth refresh and Worker document read. All three Worker secret bindings are present; values are not verifiable by reading binding metadata. Refresh/parser/identity code is implemented and synthetically tested; Phase 2 remains incomplete. Phase 1 code parity is verified for the recorded release; authenticated runtime reachability remains open.
 
