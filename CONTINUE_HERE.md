@@ -1,12 +1,12 @@
 # START HERE — Vephla Reporting Agent
 
-> **Purpose:** Single-entry handoff for a new ChatGPT conversation or developer. **Last reviewed:** 2026-11-17 (WAT). Read this first, then `docs/DEVELOPMENT_STATUS.md`, `docs/ARCHITECTURE.md`, and the latest commit/CI before changing anything.
+> **Purpose:** Single-entry handoff for a new ChatGPT conversation or developer. **Last reviewed:** 2026-11-18 (WAT). Read this first, then `docs/DEVELOPMENT_STATUS.md`, `docs/ARCHITECTURE.md`, and the latest commit/CI before changing anything.
 
 ## One-minute context
 
 This is a proposed fully automated workday reporting agent for Vephla Group. Each workday, it should read the daily charter from a Google Doc, identify Tasks 1–4, write honest progress reports, and eventually submit four Google Form clock-ins. A more detailed end-of-day email may follow. **User's final policy:** fully automatic submissions, **unverified statuses explicitly labelled**, evidence field always **`NIL`**, Africa/Lagos (WAT). Automation must not fabricate completion, proof links, time worked, or past clock-in times.
 
-**Current state:** Phase 2 refresh/parser implementation and initial Phase 3 identity protections are coded and tested (23 automated tests). Independent Google OAuth client/consent/secrets and protected live Worker invocation remain blocked. Phase 2 is not complete. Existing infrastructure is reused. Tested code `e28a27572abcd309797281cf11798995f354b1a9` is deployed; downloaded module matched the built artifact. Deployment `40ebe480-3cc7-41c4-bedd-c2f04818ed7f`, version `a0367b43-7283-422b-a623-99674969ab55`; CI [passed](https://github.com/kingbasco/Vephla-Report-Agent/actions/runs/44177004763). Later docs-only commits are not deployment changes. Main pushes run CI, not deployments. No form sender, email delivery, Cron or public URL has been enabled.
+**Current state:** Phase 2 refresh/parser implementation and initial Phase 3 identity protections are coded and tested (23 automated tests). User reports completed OAuth consent; **all three Worker secret bindings were confirmed present on 2026-11-18**, but credential validity and live token exchange are unverified. Protected Worker invocation and live Google Docs read remain blocked. Phase 2 is not complete. Existing infrastructure is reused. Tested code `e28a27572abcd309797281cf11798995f354b1a9` is deployed; downloaded module matched the built artifact. Deployment `40ebe480-3cc7-41c4-bedd-c2f04818ed7f`, version `a0367b43-7283-422b-a623-99674969ab55`; CI [passed](https://github.com/kingbasco/Vephla-Report-Agent/actions/runs/44177004763). Later docs-only commits are not deployment changes. Main pushes run CI, not deployments. No form sender, email delivery, Cron or public URL has been enabled.
 
 ## Project pointers
 
@@ -36,8 +36,8 @@ This is a proposed fully automated workday reporting agent for Vephla Group. Eac
 
 ## Next exact task — finish Phase 2 external acceptance
 
-1. Read `docs/GOOGLE_OAUTH_SETUP.md`. Choose/approve a Google reader identity and provision a Google OAuth client with offline consent. The implemented read-only Docs scope is account-wide; prefer a dedicated identity with duplicate-only Viewer access. Code restricts reads to the duplicate, not Google permission itself.
-2. Install `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, `GOOGLE_OAUTH_REFRESH_TOKEN` as secrets on the existing test Worker, through a secure surface. Never paste secrets into chat or public GitHub. Google Cloud credentials UI was unavailable in this cloud browser; no consent was obtained.
+1. Confirm the consented Google reader identity and least-privilege scope are appropriate. User reports OAuth token generated; binding presence does not prove a working grant. The implemented read-only Docs scope is account-wide; prefer a dedicated identity with duplicate-only Viewer access.
+2. Three Worker secret **names/types are already configured and confirmed**: `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, `GOOGLE_OAUTH_REFRESH_TOKEN`. Do **not** request them in chat. Verify the real refresh request through secure Worker execution, rather than inspecting credential values.
 3. Establish an authorized internal/protected invocation path without public workers.dev. Test `/health`, bearer-protected `/config`, and `/preview?date=2026-11-17&slot=2` independently from the Worker. Confirm real Google API read and D1, redacted failures, source links and Unverified/NIL output.
 4. `0002_task_identity.sql` is already applied and verified on the existing D1: old `task_status` preserved, new statuses use `task_status_v2`. Status API now takes `taskId`, not index. Confirm exact identity and changed-source behaviour live.
 5. Connector read plus local actual-source validation passed for Nov 17 Task 2 (33 source lines; 22 assignment/substep entries, 11 context/instruction lines). It is not proof of Worker OAuth. Test other source dates/layouts and revoked consent before checking cloud acceptance.
