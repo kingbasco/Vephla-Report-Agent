@@ -2,6 +2,10 @@
 
 This is an audit-friendly summary, not a fabricated deployment history. Use precise dates, commit SHAs, and evidence links. New entries go at the top.
 
+## 2026-11-27 — Renewed grant verified at 00:58 WAT
+
+The renewed grant passed the live OAuth exchange and the Worker's exact Docs read-only scope check. Google Docs returned HTTP 403 for the duplicate document. The preview returned 503 `google_document_access_denied`. Verify Viewer access for the account used in OAuth Playground and Google Docs API enablement in the OAuth client project. The preview and D1 read are pending. Health and authenticated config returned 200, unauthenticated config returned 401. Build `1b796b714250ce92eee0892475fddbc660d2484c`, deployment `f414a495-88f3-41da-9259-18301058192e`. Removed the temporary instance, Workflow and caller. Public URLs disabled and Cron empty.
+
 ## 2026-11-27 — Patched private OAuth retest
 
 - Deployed locally tested source `1b796b714250ce92eee0892475fddbc660d2484c` to the isolated test Worker through the Cloudflare connector. The first private retest stopped at bearer authentication. A new temporary caller with its secret set after Workflow registration and a short propagation wait passed health (200), unauthenticated config (401), and authenticated config (200).
