@@ -2,6 +2,12 @@
 
 This is an audit-friendly summary, not a fabricated deployment history. Use precise dates, commit SHAs, and evidence links. New entries go at the top.
 
+## 2026-11-27 — Private Worker runtime test
+
+- At 00:26 WAT, a one-off Cloudflare Workflow called the test Worker over a service binding. After the approved rotation of `ADMIN_TOKEN`, `GET /health` returned 200, unauthenticated `GET /config` returned 401, and authenticated `GET /config` returned 200 with Google OAuth bindings present.
+- Authenticated `GET /preview?date=2026-11-17&slot=2` returned HTTP 503 with `google_oauth_unavailable`. The token request threw before the reader received a usable response. No token exchange, duplicate document read, report content or D1 read was verified. Investigate the Workers fetch options, including `redirect: 'error'`, before changing Google consent or credentials.
+- Source `e28a27572abcd309797281cf11798995f354b1a9`; deployment `a56bc681-c6a4-4409-81df-f0ffc8cc385c`; version `f3bda0b1-9ac3-4859-ba3b-0dfa0e2ab2ef` (100%). Deleted the temporary Workflow instance, Workflow and caller Worker. Verified the caller and Workflow were absent, workers.dev and preview URLs disabled, Cron empty, and the existing OAuth and D1 bindings present. No form submission or email.
+
 ## 2026-11-18 — Protected runtime invocation assessment
 
 - Confirmed latest Worker deployment `daa867b9-27a5-4edc-9700-8404022c0039`, version `e57606f0-e364-4371-81ed-0eed79f98350` (100% traffic), with all three Google OAuth secret bindings present. No secret values retrieved.
