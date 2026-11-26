@@ -2,10 +2,16 @@
 
 This is an audit-friendly summary, not a fabricated deployment history. Use precise dates, commit SHAs, and evidence links. New entries go at the top.
 
+## 2026-11-27 — Patched private OAuth retest
+
+- Deployed locally tested source `1b796b714250ce92eee0892475fddbc660d2484c` to the isolated test Worker through the Cloudflare connector. The first private retest stopped at bearer authentication. A new temporary caller with its secret set after Workflow registration and a short propagation wait passed health (200), unauthenticated config (401), and authenticated config (200).
+- At 00:41 WAT, the November 17 Task 2 preview reached Google's token response and returned HTTP 503 with `google_reauthorization_required`, the Worker's mapping for Google's `invalid_grant`. Reauthorize the test reader and securely replace the refresh token before repeating the duplicate-only preview. No duplicate Doc read, report preview, or D1 runtime read was verified.
+- Deployment `8b237f96-8206-4369-810f-ef7377eddd43`, version `ccdcbb81-5a80-49de-9ca0-b5b7d10eff19`. Temporary Workflow instances, Workflows and caller Workers were removed. Public URLs and Cron remained disabled. No form submission or email.
+
 ## 2026-11-27 — Google fetch redirect handling
 
 - Updated the OAuth and Docs requests to use manual redirect handling in Workers. Redirect responses are rejected without following their destination or forwarding credentials.
-- Added redirect regression coverage. All 24 tests, syntax checks, safety checks and the Worker bundle passed locally. The private runtime retest is still pending.
+- Added redirect regression coverage. All 24 tests, syntax checks, safety checks and the Worker bundle passed locally. The live retest is recorded above.
 
 ## 2026-11-27 — Private Worker runtime test
 
