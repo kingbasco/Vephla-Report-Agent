@@ -2,6 +2,11 @@
 
 This is an audit-friendly summary, not a fabricated deployment history. Use precise dates, commit SHAs, and evidence links. New entries go at the top.
 
+## 2026-11-27 — Google fetch redirect handling
+
+- Updated the OAuth and Docs requests to use manual redirect handling in Workers. Redirect responses are rejected without following their destination or forwarding credentials.
+- Added redirect regression coverage. All 24 tests, syntax checks, safety checks and the Worker bundle passed locally. The private runtime retest is still pending.
+
 ## 2026-11-27 — Private Worker runtime test
 
 - At 00:26 WAT, a one-off Cloudflare Workflow called the test Worker over a service binding. After the approved rotation of `ADMIN_TOKEN`, `GET /health` returned 200, unauthenticated `GET /config` returned 401, and authenticated `GET /config` returned 200 with Google OAuth bindings present.
