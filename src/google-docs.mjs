@@ -6,7 +6,7 @@ export class DocsError extends Error {
 }
 const fail = (code, message, status) => new DocsError(code, message, status);
 // Cache belongs to a bindings object, never to a global user/token. Tokens are not persisted.
-export function createDocumentReader({fetcher = fetch, now = Date.now} = {}) {
+export function createDocumentReader({fetcher = (...args) => fetch(...args), now = Date.now} = {}) {
   const cache = new WeakMap();
   async function accessToken(env, force = false) {
     const names = ['GOOGLE_OAUTH_CLIENT_ID', 'GOOGLE_OAUTH_CLIENT_SECRET', 'GOOGLE_OAUTH_REFRESH_TOKEN'];
@@ -24,11 +24,14 @@ export function createDocumentReader({fetcher = fetch, now = Date.now} = {}) {
       let response;
       try {
         response = await fetcher('https://oauth2.googleapis.com/token', {
-          method: 'POST', redirect: 'error', signal: AbortSignal.timeout(15000),
+          method: 'POST', redirect: 'manual', signal: AbortSignal.timeout(15000),
           headers: {'content-type': 'application/x-www-form-urlencoded'},
           body: new URLSearchParams({grant_type: 'refresh_token', client_id: credentials[0], client_secret: credentials[1], refresh_token: credentials[2]})
         });
       } catch { throw fail('google_oauth_unavailable', 'Google OAuth is unavailable; no report generated.'); }
+      if (response.status >= 300 && response.status < 400) {
+        throw fail('google_oauth_unexpected_redirect', 'Google OAuth returned an unexpected redirect.');
+      }
       let data;
       try { data = await response.json(); } catch { throw fail('google_oauth_invalid_response', 'Google OAuth returned an invalid response.'); }
       if (!response.ok) {
@@ -57,7 +60,7 @@ export function createDocumentReader({fetcher = fetch, now = Date.now} = {}) {
     for (let attempt = 0; attempt < 2; attempt++) {
       const token = await accessToken(env, attempt > 0);
       let response;
-      try { response = await fetcher(url, {redirect: 'error', signal: AbortSignal.timeout(15000), headers: {Authorization: 'Bearer ' + token}}); }
+      try { response = await fetcher(url, {redirect: 'manual', signal: AbortSignal.timeout(15000), headers: {Authorization: 'Bearer ' + token}}); }
       catch { throw fail('google_docs_unavailable', 'Google Docs is unavailable; no report generated.'); }
       if (response.status === 401 && attempt === 0) { cache.delete(env); continue; }
       if (!response.ok) {
