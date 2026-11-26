@@ -46,3 +46,20 @@ test('network and upstream errors do not leak credentials or response bodies',as
   await assert.rejects(createDocumentReader({fetcher})(env()),e=>!e.message.includes('synthetic-secret'));
  }
 });
+
+test('rejects OAuth and Docs redirects without requesting their destinations', async () => {
+  for (const redirectFrom of ['oauth', 'docs']) {
+    const calls = [];
+    const read = createDocumentReader({fetcher: async (url, options) => {
+      assert.equal(options.redirect, 'manual');
+      const endpoint = url.includes('/token') ? 'oauth' : 'docs';
+      calls.push(endpoint);
+      if (endpoint === redirectFrom) return Response.redirect('https://example.invalid/redirect', 307);
+      return token();
+    }});
+    await assert.rejects(read(env()), {
+      code: redirectFrom === 'oauth' ? 'google_oauth_unexpected_redirect' : 'google_docs_failed'
+    });
+    assert.deepEqual(calls, redirectFrom === 'oauth' ? ['oauth'] : ['oauth', 'docs']);
+  }
+});
